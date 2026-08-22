@@ -2,14 +2,16 @@ name: Update Border Queue Data
 
 on:
   schedule:
-    - cron: '0 * * * *' # Запускать каждый час в 00 минут
-  workflow_dispatch: # Позволяет запускать скрипт вручную кнопкой
+    - cron: '0 * * * *'
+  workflow_dispatch:
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    env:
+      TZ: 'Europe/Minsk' # 👈 Принудительно ставим белорусское время!
     permissions:
-      contents: write # Разрешение на перезапись файла gpk_real_archive.json
+      contents: write
 
     steps:
     - name: Checkout repository
