@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мониторинг очередей ГПК РБ</title>
+    <!-- Подключаем библиотеку для рисования графиков -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Современный ТЕМНЫЙ дизайн (Dark Mode) */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a; 
+            margin: 0;
+            padding: 20px;
+            color: #f1f5f9; 
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1e293b; 
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            border: 1px solid #334155;
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-top: 0;
+            margin-bottom: 30px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Блок управления: выпадающие списки */
+        .controls-header {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap; 
+        }
+
+        /* Общий стиль для выпадающих списков */
+        select {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            border: 2px solid #334155;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+        select:hover, select:focus {
+            border-color: #3b82f6; 
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Совмещенные кнопки-карточки (Тип транспорта + Статистика) */
+        .chart-toggles {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .type-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            background-color: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #94a3b8;
+            flex: 1; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .type-btn .btn-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .type-btn .btn-value {
+            font-size: 40px;
+            font-weight: 900;
+            color: #ffffff; 
+            line-height: 1;
+        }
+
+        /* Цвета для активных состояний */
+        .type-btn[data-type="cars"].active { 
+            border-color: #3b82f6; 
+            background-color: #3b82f6; 
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+        .type-btn[data-type="buses"].active { 
+            border-color: #a855f7; 
+            background-color: #a855f7; 
+            box-shadow: 0 8px 20px rgba(168, 85, 247, 0.3);
+        }
+        .type-btn[data-type="trucks"].active { 
+            border-color: #f97316; 
+            background-color: #f97316; 
+            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.3);
+        }
+
+        .type-btn.active .btn-title,
+        .type-btn.active .btn-value {
+            color: #ffffff;
+        }
+        
+        .type-btn:hover:not(.active) { 
+            background-color: #1e293b; 
+            border-color: #475569;
+            transform: translateY(-3px);
+        }
+        .type-btn.active:hover { filter: brightness(1.1); }
+
+        /* Контейнер графика и кнопка скачивания */
+        .chart-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+        
+        .export-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .export-btn:hover {
+            background-color: #334155;
+            color: #ffffff;
+            border-color: #64748b;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 450px;
+            width: 100%;
+        }
+
+        /* Подвал: часы и источник */
+        .footer-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #334155; 
+        }
+        .date-text {
+            font-size: 16px;
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .footer-separator {
+            width: 6px;
+            height: 6px;
+            background-color: #475569;
+            border-radius: 50%; 
+        }
+        .time-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #38bdf8; 
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 1px;
+        }
+        .source-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #64748b;
+        }
+        .source-text a {
+            color: #38bdf8;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .source-text a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📊 Архив очередей на границе Республики Беларусь</h1>
+
+        <div class="controls-header">
+            <select id="crossingSelect">
+                <option value="brest" selected>Брест</option>
+                <option value="kozlovichi">Козловичи</option>
+                <option value="berestovitsa">Берестовица</option>
+                <option value="bruzgi">Брузги</option>
+                <option value="stone_log">Каменный Лог</option>
+                <option value="benekainys">Бенякони</option>
+                <option value="grigorov">Григоровщина</option>
+            </select>
+
+            <select id="timeRangeSelect">
+                <option value="1">Последние 24 часа</option>
+                <option value="3" selected>Последние 3 дня</option>
+                <option value="7">Последняя неделя</option>
+                <option value="30">Последний месяц</option>
+                <option value="all">За всё время</option>
+            </select>
+        </div>
+
+        <div class="chart-toggles" id="typeContainer">
+            <button class="type-btn active" data-type="cars">
+                <span class="btn-title">🚗 Легковые</span>
+                <span class="btn-value" id="carsValue">0</span>
+            </button>
+            <button class="type-btn" data-type="buses">
+                <span class="btn-title">🚌 Автобусы</span>
+                <span class="btn-value" id="busesValue">0</span>
+            </button>
+            <button class="type-btn" data-type="trucks">
+                <span class="btn-title">🚛 Грузовые</span>
+                <span class="btn-value" id="trucksValue">0</span>
+            </button>
+        </div>
+
+        <!-- Кнопка скачивания графика -->
+        <div class="chart-actions">
+            <button class="export-btn" id="exportBtn">📸 Скачать график</button>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="queueChart"></canvas>
+        </div>
+
+        <div class="footer-info">
+            <div class="date-text" id="dateDisplay">Загрузка...</div>
+            <div class="footer-separator"></div>
+            <div class="time-text" id="timeDisplay">--:--:--</div>
+        </div>
+        
+        <div class="source-text">
+            Источник: <a href="https://gpk.gov.by/situation-at-the-border/arkhiv-ocheredey/" target="_blank" rel="noopener noreferrer">официальный сайт Гос. погранкомитета Республики Беларусь</a>
+        </div>
+    </div>
+
+    <script>
+        // --- ЧАСЫ ---
+        function updateClock() {
+            const now = new Date();
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const dateOptions = { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' };
+            
+            document.getElementById('timeDisplay').innerText = now.toLocaleTimeString('ru-RU', timeOptions);
+            document.getElementById('dateDisplay').innerText = now.toLocaleDateString('ru-RU', dateOptions);
+        }
+        setInterval(updateClock, 1000);
+        updateClock(); 
+
+        // --- ПЛАВНАЯ АНИМАЦИЯ ЦИФР (ОДОМЕТР) ---
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Эффект плавного замедления в конце (easeOutQuart)
+                const easeProgress = 1 - Math.pow(1 - progress, 4);
+                obj.innerHTML = Math.floor(easeProgress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    obj.innerHTML = end; // Гарантируем точное финальное значение
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        const monthMap = {
+            'Jan': 'Янв', 'Feb': 'Фев', 'Mar': 'Мар', 'Apr': 'Апр', 
+            'May': 'Май', 'Jun': 'Июн', 'Jul': 'Июл', 'Aug': 'Авг', 
+            'Sep': 'Сен', 'Oct': 'Окт', 'Nov': 'Ноя', 'Dec': 'Дек'
+        };
+
+        // --- ЛОГИКА ДАШБОРДА ---
+        let dataStore = {};
+        let myChart = null;
+        
+        let currentCrossing = 'brest';
+        let currentType = 'cars';
+        
+        const ctx = document.getElementById('queueChart').getContext('2d');
+        const crossingSelect = document.getElementById('crossingSelect');
+        const timeRangeSelect = document.getElementById('timeRangeSelect');
+
+        crossingSelect.addEventListener('change', (e) => {
+            currentCrossing = e.target.value;
+            updateDashboard();
+        });
+
+        timeRangeSelect.addEventListener('change', updateDashboard);
+
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                currentType = e.currentTarget.dataset.type;
+                updateDashboard();
+            });
+        });
+
+        // --- СКАЧИВАНИЕ КАРТИНКИ ---
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            if (!myChart) return;
+            // Создаем временную ссылку
+            const link = document.createElement('a');
+            
+            // Название файла (например: График_brest_cars.png)
+            const typeNames = { 'cars': 'Легковые', 'buses': 'Автобусы', 'trucks': 'Грузовые' };
+            const crossingName = crossingSelect.options[crossingSelect.selectedIndex].text;
+            link.download = `Очередь_${crossingName}_${typeNames[currentType]}.png`;
+            
+            // Получаем картинку с канваса
+            link.href = myChart.toBase64Image('image/png', 1);
+            link.click();
+        });
+
+        // Плагин Chart.js для отрисовки темного фона перед скачиванием
+        // (Иначе картинка будет с прозрачным фоном и черный текст сольется)
+        const customCanvasBackgroundColor = {
+            id: 'customCanvasBackgroundColor',
+            beforeDraw: (chart) => {
+                const { ctx } = chart;
+                ctx.save();
+                ctx.globalCompositeOperation = 'destination-over';
+                ctx.fillStyle = '#1e293b'; // Под цвет контейнера дашборда
+                ctx.fillRect(0, 0, chart.width, chart.height);
+                ctx.restore();
+            }
+        };
+
+        function loadData() {
+            const cacheBuster = new Date().getTime();
+            fetch('gpk_real_archive.json?v=' + cacheBuster)
+                .then(response => {
+                    if (!response.ok) throw new Error("Файл не найден");
+                    return response.json();
+                })
+                .then(data => {
+                    dataStore = data;
+                    updateDashboard(); 
+                })
+                .catch(error => console.error("Ошибка загрузки данных:", error));
+        }
+
+        function updateDashboard() {
+            if (!dataStore[currentCrossing]) return;
+
+            const pointData = dataStore[currentCrossing];
+
+            // Обновляем цифры внутри кнопок с АНИМАЦИЕЙ
+            const lastIdx = pointData.cars.length - 1;
+            
+            const carsEl = document.getElementById('carsValue');
+            const busesEl = document.getElementById('busesValue');
+            const trucksEl = document.getElementById('trucksValue');
+
+            // Берем текущее значение на экране (чтобы от него стартовать счетчик)
+            const currentCars = parseInt(carsEl.innerText) || 0;
+            const currentBuses = parseInt(busesEl.innerText) || 0;
+            const currentTrucks = parseInt(trucksEl.innerText) || 0;
+
+            if (lastIdx >= 0) {
+                animateValue(carsEl, currentCars, pointData.cars[lastIdx], 800);
+                animateValue(busesEl, currentBuses, pointData.buses[lastIdx], 800);
+                animateValue(trucksEl, currentTrucks, pointData.trucks[lastIdx], 800);
+            } else {
+                animateValue(carsEl, currentCars, 0, 800);
+                animateValue(busesEl, currentBuses, 0, 800);
+                animateValue(trucksEl, currentTrucks, 0, 800);
+            }
+
+            const range = timeRangeSelect.value;
+            let sliceCount = pointData.labels.length; 
+
+            if (range !== "all") {
+                const days = parseInt(range);
+                sliceCount = days * 12; 
+            }
+
+            const rawLabels = pointData.labels.slice(-sliceCount);
+            const chartLabels = rawLabels.map(lbl => {
+                let parts = lbl.split(', '); 
+                if (parts.length === 2) {
+                    let datePart = parts[0];
+                    let timePart = parts[1];
+                    for (let en in monthMap) {
+                        if (datePart.includes(en)) {
+                            datePart = datePart.replace(en, monthMap[en]);
+                            break;
+                        }
+                    }
+                    return [timePart, datePart];
+                }
+                return lbl;
+            });
+
+            const chartCars = pointData.cars.slice(-sliceCount);
+            const chartBuses = pointData.buses.slice(-sliceCount);
+            const chartTrucks = pointData.trucks.slice(-sliceCount);
+
+            let datasetsConfig = [];
+            
+            if (currentType === 'cars') {
+                datasetsConfig.push({
+                    label: '🚗 Легковые',
+                    data: chartCars,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#3b82f6'
+                });
+            } else if (currentType === 'buses') {
+                datasetsConfig.push({
+                    label: '🚌 Автобусы',
+                    data: chartBuses,
+                    borderColor: '#a855f7', 
+                    backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#a855f7'
+                });
+            } else if (currentType === 'trucks') {
+                datasetsConfig.push({
+                    label: '🚛 Грузовые',
+                    data: chartTrucks,
+                    borderColor: '#f97316', 
+                    backgroundColor: 'rgba(249, 115, 22, 0.2)', 
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#f97316'
+                });
+            }
+
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: datasetsConfig
+                },
+                // Подключаем наш плагин для правильного фона картинки
+                plugins: [customCanvasBackgroundColor],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)', 
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#f1f5f9',
+                            titleFont: { size: 16 }, 
+                            bodyFont: { size: 15 }, 
+                            padding: 12,
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            callbacks: {
+                                title: function(context) {
+                                    let label = context[0].label;
+                                    if (label && label.includes(',')) {
+                                        let parts = label.split(',');
+                                        return parts[1].trim() + ' в ' + parts[0].trim();
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
+                            ticks: { color: '#94a3b8' }, 
+                            title: {
+                                display: true,
+                                text: 'Количество ТС в очереди',
+                                color: '#94a3b8'
+                            }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { 
+                                maxRotation: 0, 
+                                minRotation: 0, 
+                                autoSkip: true, 
+                                maxTicksLimit: 12, 
+                                color: '#94a3b8',
+                                font: { size: 13 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        setInterval(loadData, 300000); 
+        loadData();
+    </script>
+</body>
+</html>
