@@ -1,0 +1,15 @@
+{
+  "name": "Очереди ГПК РБ",
+  "short_name": "ГПК Очереди",
+  "start_url": "/belarus-border-queue/index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Coat_of_arms_of_Belarus.svg/512px-Coat_of_arms_of_Belarus.svg.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
