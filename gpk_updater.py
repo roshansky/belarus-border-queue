@@ -127,4 +127,5 @@ def update_data():
         print("  ⚠️ Не удалось получить новые данные.")
 
 if __name__ == "__main__":
+    print("🤖 Запуск обновления данных на сервере GitHub...")
     update_data()
