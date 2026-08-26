@@ -211,6 +211,27 @@
             opacity: 0.8;
             text-decoration: underline;
         }
+        /* 1. Безопасные отступы для iOS (работают везде, на ПК равны нулю) */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* 2. Стили ТОЛЬКО для сенсорных экранов (смартфоны и планшеты) */
+  @media (hover: none) and (pointer: coarse) {
+    
+    /* Убирает синее мигание экрана при нажатии пальцем */
+    body {
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    /* Запрещает выделение текста на элементах интерфейса (чтобы они работали как кнопки) */
+    /* Вы можете добавить сюда свои классы, например .my-button */
+    button, a, input, .button {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  }
     </style>
 </head>
 <body>
