@@ -573,5 +573,34 @@
             });
         }
     </script>
+    <script>
+document.addEventListener("DOMContentLoaded", async function() {
+    const reportContainer = document.getElementById('ai-report-content');
+    
+    try {
+        // Загружаем JSON-файл с отчетом
+        const response = await fetch('weekly_report.json');
+        
+        if (!response.ok) {
+            throw new Error('Файл отчета не найден');
+        }
+        
+        const data = await response.json();
+        
+        // Замените 'report_text' на реальный ключ, который генерирует ваш agent_report.py
+        if (data && data.report_text) {
+            // Заменяем переносы строк на теги <br> для корректного отображения в HTML
+            reportContainer.innerHTML = `<p>${data.report_text.replace(/\n/g, '<br>')}</p>`;
+        } else {
+            // Резервный вывод всего JSON, если точная структура пока неизвестна
+            reportContainer.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+        
+    } catch (error) {
+        console.error("Ошибка при загрузке отчета:", error);
+        reportContainer.innerHTML = '<p>Не удалось загрузить еженедельный отчет.</p>';
+    }
+});
+</script>
 </body>
 </html>
