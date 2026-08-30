@@ -29,7 +29,7 @@ jobs:
 
       - name: Update border history
         # Сначала запускаем ваш скрипт обновления истории, чтобы создать history.json
-        run: python gpk_history.py
+        run: python gpk_updater.py
 
       - name: Run AI Agent #[cite: 2]
         env:
