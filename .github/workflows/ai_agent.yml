@@ -41,8 +41,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action AI"
-          # Добавляем оба файла, если gpk_history.py тоже обновляет данные в репозитории
-          git add history.json weekly_report.json
-          # Сохраняем результат, если есть изменения[cite: 2]
+          git add gpk_real_archive.json weekly_report.json
           git commit -m "🤖 Обновлена история и добавлен отчет ИИ-агента" || echo "Нет изменений для коммита"
           git push
