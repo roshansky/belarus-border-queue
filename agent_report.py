@@ -50,7 +50,7 @@ print("Отправка данных в Gemini...")
 
 # Новый синтаксис вызова модели
 response = client.models.generate_content(
-    model= 'gemini-2.0-flash',
+    model= 'gemini-3.0-flash',
     contents=system_prompt
 )
 
