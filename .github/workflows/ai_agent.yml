@@ -35,7 +35,7 @@ jobs:
         env:
           # Передаем секретный ключ из настроек GitHub в скрипт[cite: 2]
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} #[cite: 2]
-        run: python agent_report.py #[cite: 2]
+        run: python agent_updater.py #[cite: 2]
 
       - name: Commit and push report #[cite: 2]
         run: |
