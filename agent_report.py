@@ -1,20 +1,19 @@
 import json
 import os
-import google.generativeai as genai
+from google import genai # Обновленный импорт новой библиотеки
 
 # 1. Настройка доступа к Gemini
-# Скрипт возьмет ключ GEMINI_API_KEY, который вы только что добавили в GitHub Secrets
+# Скрипт возьмет ключ GEMINI_API_KEY из переменных окружения (секретов GitHub)
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
     raise ValueError("Ключ GEMINI_API_KEY не найден в переменных окружения")
 
-genai.configure(api_key=api_key)
-
-# Используем актуальную модель 1.5 Flash (она быстрее и дешевле Pro, отлично подходит для текста)
-model = genai.GenerativeModel('gemini-1.5-flash') 
+# Инициализация нового клиента
+client = genai.Client(api_key=api_key)
 
 # 2. Загрузка данных 
-# Укажите здесь имя вашего JSON-файла, который формирует gpk_history.py
+# ВАЖНО: Убедитесь, что этот скрипт запускается после того, 
+# как будет создан history.json!
 file_path = 'history.json' 
 
 try:
@@ -24,8 +23,7 @@ except FileNotFoundError:
     print(f"Файл {file_path} не найден. Проверьте путь.")
     raw_data = {}
 
-# Для простоты передаем весь JSON. Если файл очень большой, 
-# здесь нужно написать логику среза только за последние 7 дней.
+# Для простоты передаем весь JSON.
 compressed_data = json.dumps(raw_data, ensure_ascii=False)
 
 # 3. Формирование промпта
@@ -49,10 +47,15 @@ system_prompt = f"""
 
 # 4. Запрос к нейросети
 print("Отправка данных в Gemini...")
-response = model.generate_content(system_prompt)
+
+# Новый синтаксис вызова модели
+response = client.models.generate_content(
+    model='gemini-1.5-flash',
+    contents=system_prompt
+)
 
 # 5. Сохранение результата
-# Упаковываем ответ в JSON, чтобы ваше Kotlin-приложение и веб-дашборд могли легко его прочитать
+# Упаковываем ответ в JSON, чтобы ваше приложение могло легко его прочитать
 report_output = {
         "report_markdown": response.text
 }
