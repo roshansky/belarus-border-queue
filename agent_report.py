@@ -13,8 +13,8 @@ client = genai.Client(api_key=api_key)
 
 # 2. Загрузка данных 
 # ВАЖНО: Убедитесь, что этот скрипт запускается после того, 
-# как будет создан history.json!
-file_path = 'history.json' 
+# как будет создан 'gpk_real_archive.json'
+file_path = 'gpk_real_archive.json'
 
 try:
     with open(file_path, 'r', encoding='utf-8') as f:
