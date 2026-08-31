@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <title>Еженедельный AI-отчет о границах</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* Сохраняем темный дизайн основного сайта */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a; 
+            margin: 0;
+            padding: 20px;
+            color: #f1f5f9; 
+            min-height: 100vh;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .container {
+            max-width: 900px; /* Сделали чуть уже для комфортного чтения текста */
+            margin: 0 auto;
+            background: #1e293b; 
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            border: 1px solid #334155;
+        }
+        
+        /* Кнопка "Назад" */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            font-weight: bold;
+            background-color: #0f172a;
+            color: #94a3b8;
+            text-decoration: none;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .back-btn:hover {
+            background-color: #334155;
+            color: #ffffff;
+            border-color: #64748b;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-top: 0;
+            margin-bottom: 30px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Стили для текста отчета (Markdown) */
+        .markdown-body {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+        .markdown-body h3 {
+            color: #38bdf8;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #334155;
+            font-size: 22px;
+        }
+        .markdown-body p { margin-bottom: 16px; }
+        .markdown-body ul { 
+            margin-bottom: 20px; 
+            padding-left: 25px; 
+        }
+        .markdown-body li { margin-bottom: 10px; }
+        .markdown-body strong { color: #ffffff; font-weight: 700; }
+        .markdown-body hr {
+            border: 0;
+            border-top: 1px dashed #475569;
+            margin: 30px 0;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 18px;
+            padding: 40px 0;
+        }
+        
+        .error {
+            text-align: center;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ef4444;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="index.html" class="back-btn">⬅ Назад к графикам</a>
+        
+        <h1>🤖 Аналитика и рекомендации</h1>
+        
+        <div id="reportContent" class="markdown-body">
+            <div class="loading">Загрузка отчета от ИИ-агента...</div>
+        </div>
+    </div>
+
+    <script>
+        // Функция для загрузки и отображения отчета
+        function loadReport() {
+            // Добавляем ?v=... чтобы браузер не кешировал старый файл
+            const cacheBuster = new Date().getTime();
+            fetch('weekly_report.json?v=' + cacheBuster)
+                .then(response => {
+                    if (!response.ok) throw new Error("Файл отчета не найден");
+                    return response.json();
+                })
+                .then(data => {
+                    // Используем библиотеку marked для конвертации Markdown в HTML
+                    const htmlContent = marked.parse(data.report_markdown);
+                    document.getElementById('reportContent').innerHTML = htmlContent;
+                })
+                .catch(error => {
+                    console.error("Ошибка:", error);
+                    document.getElementById('reportContent').innerHTML = 
+                        '<div class="error">Ой! Не удалось загрузить отчет. Возможно, он еще не сгенерирован ИИ-агентом (запуск по воскресеньям).</div>';
+                });
+        }
+
+        // Запускаем при загрузке страницы
+        loadReport();
+    </script>
+</body>
+</html>
