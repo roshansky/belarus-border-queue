@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Настройки PWA для iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -307,6 +308,13 @@
         }
     </style>
 </head>
+<script>
+  if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.ready();      // Сообщает Telegram, что приложение загрузилось
+    tg.expand();     // Разворачивает окно на весь экран телефона
+  }
+</script>    
 <body>
 
     <div class="container">
