@@ -75,7 +75,7 @@ system_prompt = f"""
 print(f"Отправка данных в Gemini за период {period_start} — {period_end}...")
 
 response = client.models.generate_content(
-    model='gemini-2.5-flash',
+    model='gemini-3.5-flash',
     contents=system_prompt,
     config=types.GenerateContentConfig(
         temperature=0.2,
