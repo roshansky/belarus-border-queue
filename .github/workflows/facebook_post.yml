@@ -1,0 +1,29 @@
+name: Facebook Border Post
+
+on:
+  workflow_dispatch: # Позволяет запускать вручную в 1 клик
+  schedule:
+    # Запуск 2 раза в сутки: в 06:00 и 18:00 UTC (09:00 и 21:00 по Минску)
+    - cron: '0 6,18 * * *'
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Run fb_poster.py
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python fb_poster.py
