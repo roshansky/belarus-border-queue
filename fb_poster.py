@@ -3,48 +3,65 @@ import json
 import requests
 from datetime import datetime
 
-# 1. Чтение ваших данных (адаптируйте имя файла под ваш проект)
+JSON_FILE = "gpk_real_archive.json"
+
 def load_queue_data():
     try:
-        with open("latest_data.json", "r", encoding="utf-8") as f:
+        with open(JSON_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        print("Файл с данными не найден.")
+        print(f"Ошибка: файл {JSON_FILE} не найден.")
         return None
 
-# 2. Формирование шаблона поста
+def get_latest(data, crossing, vehicle_type):
+    """Извлекает последнее актуальное значение очереди из списка"""
+    try:
+        values = data.get(crossing, {}).get(vehicle_type, [])
+        return values[-1] if values else 0
+    except (IndexError, TypeError):
+        return 0
+
 def format_post_text(data):
-    # Получаем текущее время
-    now = datetime.now().strftime("%d.%m.%Y %H:%M")
+    # Время берем из последней метки архива или текущее
+    labels = data.get('brest', {}).get('labels', [])
+    time_str = labels[-1] if labels else datetime.now().strftime("%d.%m.%Y %H:%M")
     
-    # Собираем текст поста
-    text = f"🚗 Обстановка на границе РБ на {now}:\n\n"
+    text = f"🚗 Обстановка на выезд из РБ ({time_str}):\n\n"
     
-    # ВНИМАНИЕ: Замените ключи 'brest_cars' и т.д. на те, что реально используются в вашем JSON
-    text += "🔹 Брест (Тересполь):\n"
-    text += f"Легковые: {data.get('brest_cars', 0)} | Автобусы: {data.get('brest_buses', 0)}\n\n"
+    # Польша
+    brest_cars = get_latest(data, 'brest', 'cars')
+    brest_buses = get_latest(data, 'brest', 'buses')
+    text += f"🇵🇱 Брест (Тересполь):\nЛегковые: {brest_cars} | Автобусы: {brest_buses}\n\n"
     
-    text += "🔹 Каменный Лог (Мядининкай):\n"
-    text += f"Легковые: {data.get('kamlog_cars', 0)} | Грузовые: {data.get('kamlog_trucks', 0)}\n\n"
+    # Литва
+    kl_cars = get_latest(data, 'stone_log', 'cars')
+    kl_trucks = get_latest(data, 'stone_log', 'trucks')
+    text += f"🇱🇹 Каменный Лог (Мядининкай):\nЛегковые: {kl_cars} | Грузовые: {kl_trucks}\n\n"
     
-    text += "🔹 Бенякони (Шальчининкай):\n"
-    text += f"Легковые: {data.get('benyakoni_cars', 0)} | Грузовые: {data.get('benyakoni_trucks', 0)}\n\n"
+    ben_cars = get_latest(data, 'benekainys', 'cars')
+    ben_trucks = get_latest(data, 'benekainys', 'trucks')
+    text += f"🇱🇹 Бенякони (Шальчининкай):\nЛегковые: {ben_cars} | Грузовые: {ben_trucks}\n\n"
+
+    # Латвия
+    grig_trucks = get_latest(data, 'grigorov', 'trucks')
+    grig_cars = get_latest(data, 'grigorov', 'cars')
+    text += f"🇱🇻 Григоровщина (Патерниеки):\nГрузовые: {grig_trucks} | Легковые: {grig_cars}\n\n"
     
-    text += "📊 Смотрите графики онлайн в приложении Dash Border!\n"
-    text += "🌐 Сайт проекта: https://roshansky.github.io/belarus-border-queue/"
+    text += "📊 Графики и история очередей:\n"
+    text += "🌐 https://roshansky.github.io/belarus-border-queue/\n"
+    text += "📱 Приложение Dash Border в RuStore"
     
     return text
 
-# 3. Отправка на публичную страницу Facebook
 def post_to_facebook(message):
     page_id = os.environ.get("FB_PAGE_ID")
     token = os.environ.get("FB_PAGE_TOKEN")
     
     if not page_id or not token:
-        print("Ошибка: Не найдены токены Facebook в переменных окружения.")
+        print("Ошибка: Переменные FB_PAGE_ID или FB_PAGE_TOKEN не заданы.")
         return
 
-    url = f"https://graph.facebook.com/v19.0/{page_id}/feed"
+    url = f"https://graph.facebook.com/v21.0/{page_id}/feed"
     payload = {
         "message": message,
         "access_token": token
@@ -52,12 +69,15 @@ def post_to_facebook(message):
     
     response = requests.post(url, data=payload)
     if response.status_code == 200:
-        print(f"Пост успешно опубликован! ID: {response.json().get('id')}")
+        print(f"✅ Пост успешно опубликован! ID: {response.json().get('id')}")
     else:
-        print("Ошибка публикации:", response.text)
+        print(f"❌ Ошибка публикации ({response.status_code}): {response.text}")
 
 if __name__ == "__main__":
-    queue_data = load_queue_data()
-    if queue_data:
-        post_message = format_post_text(queue_data)
-        post_to_facebook(post_message)
+    archive = load_queue_data()
+    if archive:
+        message = format_post_text(archive)
+        print("Подготовленный текст:\n" + "-" * 35)
+        print(message)
+        print("-" * 35)
+        post_to_facebook(message)
