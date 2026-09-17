@@ -71,18 +71,35 @@ system_prompt = f"""
 {compressed_data}
 """
 
-# 4. Запрос к Gemini 3.5 Flash без лишних рассуждений
+# 4. Запрос к Gemini с автоматическим перебором моделей
 print(f"Отправка данных в Gemini за период {period_start} — {period_end}...")
 
-response = client.models.generate_content(
-    model='gemini-3.5-flash',
-    contents=system_prompt,
-    config=types.GenerateContentConfig(
-        temperature=0.2,
-        max_output_tokens=2048,
-        thinking_config=types.ThinkingConfig(thinking_budget=0)
-    )
-)
+candidate_models = [
+    os.getenv("GEMINI_MODEL", "gemini-3.5-flash"),
+    "gemini-flash-latest",
+    "gemini-3-flash"
+]
+
+response = None
+for model_name in candidate_models:
+    try:
+        print(f"Пробуем запросить отчет через {model_name}...")
+        response = client.models.generate_content(
+            model=model_name,
+            contents=system_prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.2,
+                max_output_tokens=2048,
+                thinking_config=types.ThinkingConfig(thinking_budget=0)
+            )
+        )
+        print(f"Успех! Отчет сформирован моделью: {model_name}")
+        break
+    except Exception as e:
+        print(f"Предупреждение: модель {model_name} вернула ошибку: {e}")
+
+if not response:
+    raise RuntimeError("Ошибка: ни одна из доступных моделей Gemini не смогла сгенерировать отчет.")
 
 # 5. Сохранение результата
 report_output = {
