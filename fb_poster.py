@@ -54,14 +54,14 @@ def format_post_text(data):
     return text
 
 def post_to_facebook(message):
-    page_id = os.environ.get("FB_PAGE_ID")
     token = os.environ.get("FB_PAGE_TOKEN")
     
-    if not page_id or not token:
-        print("Ошибка: Переменные FB_PAGE_ID или FB_PAGE_TOKEN не заданы.")
+    if not token:
+        print("Ошибка: Переменная FB_PAGE_TOKEN не задана.")
         return
 
-    url = f"https://graph.facebook.com/v21.0/{page_id}/feed"
+    # Отправляем напрямую в me/feed страницы
+    url = "https://graph.facebook.com/v21.0/me/feed"
     payload = {
         "message": message,
         "access_token": token
