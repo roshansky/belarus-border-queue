@@ -47,9 +47,7 @@ def format_post_text(data):
     grig_cars = get_latest(data, 'grigorov', 'cars')
     text += f"🇱🇻 Григоровщина (Патерниеки):\nГрузовые: {grig_trucks} | Легковые: {grig_cars}\n\n"
     
-    text += "📊 Графики и история очередей:\n"
-    text += "🌐 https://roshansky.github.io/belarus-border-queue/\n"
-    text += "📱 Приложение Dash Border в RuStore"
+    text += "📊 Интерактивные графики и наше приложение Dash Border — ищите по ссылке в описании профиля 👆"
     
     return text
 
