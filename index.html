@@ -2,15 +2,14 @@
 <html lang="ru">
 <head>
     <!-- Настройки PWA для iOS -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<!-- Подключаем вашу иконку для экрана "Домой" -->
-<link rel="apple-touch-icon" href="icon-512.png">
+    <!-- Подключаем вашу иконку для экрана "Домой" -->
+    <link rel="apple-touch-icon" href="icon-512.png">
     <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мониторинг очередей ГПК РБ</title>
     <!-- Подключаем библиотеку для рисования графиков -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -166,13 +165,92 @@
             height: 450px;
             width: 100%;
         }
+
+        /* Панель быстрых ссылок и AI-отчета */
+        .links-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            padding: 10px 14px;
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid #334155;
+            border-radius: 12px;
+        }
+
+        .link-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #cbd5e1;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .link-item svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+            fill: currentColor;
+        }
+
+        .link-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Кнопка AI-отчета */
+        .link-item.btn-ai {
+            background-color: #2563eb;
+            color: #ffffff;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+        .link-item.btn-ai:hover {
+            background-color: #1d4ed8;
+            border-color: #60a5fa;
+            color: #ffffff;
+        }
+
+        /* Эффекты при наведении на социальные и app-ссылки */
+        .link-item.btn-tg:hover {
+            color: #38bdf8;
+            border-color: #0284c7;
+            background-color: #0f172a;
+        }
+        .link-item.btn-fb:hover {
+            color: #60a5fa;
+            border-color: #2563eb;
+            background-color: #0f172a;
+        }
+        .link-item.btn-rustore:hover {
+            color: #4ade80;
+            border-color: #16a34a;
+            background-color: #0f172a;
+        }
+        .link-item.btn-github:hover {
+            color: #f1f5f9;
+            border-color: #94a3b8;
+            background-color: #0f172a;
+        }
+
         /* Подвал: часы и источник */
         .footer-info {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 15px;
-            margin-top: 30px;
+            margin-top: 25px;
             padding-top: 20px;
             border-top: 1px dashed #334155; 
         }
@@ -210,27 +288,23 @@
             opacity: 0.8;
             text-decoration: underline;
         }
-        /* 1. Безопасные отступы для iOS (работают везде, на ПК равны нулю) */
-  body {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
 
-  /* 2. Стили ТОЛЬКО для сенсорных экранов (смартфоны и планшеты) */
-  @media (hover: none) and (pointer: coarse) {
-    
-    /* Убирает синее мигание экрана при нажатии пальцем */
-    body {
-      -webkit-tap-highlight-color: transparent; 
-    }
+        /* Безопасные отступы для iOS */
+        body {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
 
-    /* Запрещает выделение текста на элементах интерфейса (чтобы они работали как кнопки) */
-    /* Вы можете добавить сюда свои классы, например .my-button */
-    button, a, input, .button {
-      -webkit-user-select: none;
-      user-select: none;
-    }
-  }
+        /* Стили для сенсорных экранов */
+        @media (hover: none) and (pointer: coarse) {
+            body {
+                -webkit-tap-highlight-color: transparent; 
+            }
+            button, a, input, .button {
+                -webkit-user-select: none;
+                user-select: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -281,10 +355,35 @@
             <canvas id="queueChart"></canvas>
         </div>
 
-        <!-- Кнопка перехода к AI-отчету (НОВОЕ МЕСТО) -->
-        <div style="text-align: center; margin-top: 30px; margin-bottom: 10px;">
-            <a href="report.html" class="export-btn" style="display: inline-flex; justify-content: center; width: auto; font-size: 16px; padding: 12px 24px; background-color: #3b82f6; color: white; border: none; text-decoration: none; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); border-radius: 8px; transition: all 0.2s;">
-                🤖 Читать еженедельный AI-отчет
+        <!-- Панель быстрых ссылок и AI-отчета -->
+        <div class="links-bar">
+            <!-- 1. AI-отчет -->
+            <a href="report.html" class="link-item btn-ai">
+                🤖 AI-отчет за неделю
+            </a>
+
+            <!-- 2. Telegram -->
+            <a href="https://t.me/borderdash_rb" target="_blank" rel="noopener noreferrer" class="link-item btn-tg" title="Канал в Telegram">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                Telegram
+            </a>
+
+            <!-- 3. Facebook -->
+            <a href="https://www.facebook.com/profile.php?id=61589995062757" target="_blank" rel="noopener noreferrer" class="link-item btn-fb" title="Группа Facebook">
+                <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                Facebook
+            </a>
+
+            <!-- 4. RuStore -->
+            <a href="https://www.rustore.ru/catalog/app/com.example.borderdash" target="_blank" rel="noopener noreferrer" class="link-item btn-rustore" title="Приложение в RuStore">
+                <svg viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5896 8.4116 13.854 8 12 8s-3.5896.4116-5.1368 1.4507L4.8409 5.9477a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.4867 0 15.6595 0 20.4853h24c0-4.8258-2.6889-8.9986-6.1185-11.1639"/></svg>
+                RuStore
+            </a>
+
+            <!-- 5. GitHub APK -->
+            <a href="https://github.com/roshansky/belarus-border-queue/releases/latest" target="_blank" rel="noopener noreferrer" class="link-item btn-github" title="Скачать APK с GitHub">
+                <svg viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                GitHub (APK)
             </a>
         </div>
 
@@ -318,13 +417,12 @@
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                // Эффект плавного замедления в конце (easeOutQuart)
                 const easeProgress = 1 - Math.pow(1 - progress, 4);
                 obj.innerHTML = Math.floor(easeProgress * (end - start) + start);
                 if (progress < 1) {
                     window.requestAnimationFrame(step);
                 } else {
-                    obj.innerHTML = end; // Гарантируем точное финальное значение
+                    obj.innerHTML = end;
                 }
             };
             window.requestAnimationFrame(step);
@@ -366,28 +464,21 @@
         // --- СКАЧИВАНИЕ КАРТИНКИ ---
         document.getElementById('exportBtn').addEventListener('click', () => {
             if (!myChart) return;
-            // Создаем временную ссылку
             const link = document.createElement('a');
-            
-            // Название файла (например: График_brest_cars.png)
             const typeNames = { 'cars': 'Легковые', 'buses': 'Автобусы', 'trucks': 'Грузовые' };
             const crossingName = crossingSelect.options[crossingSelect.selectedIndex].text;
             link.download = `Очередь_${crossingName}_${typeNames[currentType]}.png`;
-            
-            // Получаем картинку с канваса
             link.href = myChart.toBase64Image('image/png', 1);
             link.click();
         });
 
-        // Плагин Chart.js для отрисовки темного фона перед скачиванием
-        // (Иначе картинка будет с прозрачным фоном и черный текст сольется)
         const customCanvasBackgroundColor = {
             id: 'customCanvasBackgroundColor',
             beforeDraw: (chart) => {
                 const { ctx } = chart;
                 ctx.save();
                 ctx.globalCompositeOperation = 'destination-over';
-                ctx.fillStyle = '#1e293b'; // Под цвет контейнера дашборда
+                ctx.fillStyle = '#1e293b'; 
                 ctx.fillRect(0, 0, chart.width, chart.height);
                 ctx.restore();
             }
@@ -412,14 +503,12 @@
 
             const pointData = dataStore[currentCrossing];
 
-            // Обновляем цифры внутри кнопок с АНИМАЦИЕЙ
             const lastIdx = pointData.cars.length - 1;
             
             const carsEl = document.getElementById('carsValue');
             const busesEl = document.getElementById('busesValue');
             const trucksEl = document.getElementById('trucksValue');
 
-            // Берем текущее значение на экране (чтобы от него стартовать счетчик)
             const currentCars = parseInt(carsEl.innerText) || 0;
             const currentBuses = parseInt(busesEl.innerText) || 0;
             const currentTrucks = parseInt(trucksEl.innerText) || 0;
@@ -510,7 +599,6 @@
                     labels: chartLabels,
                     datasets: datasetsConfig
                 },
-                // Подключаем наш плагин для правильного фона картинки
                 plugins: [customCanvasBackgroundColor],
                 options: {
                     responsive: true,
@@ -572,18 +660,19 @@
         setInterval(loadData, 300000); 
         loadData();
     </script>
- <script>
+    <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js');
             });
         }
     </script>
- <!-- Простой счетчик просмотров -->
-<div style="text-align: center; margin: 20px 0;">
-  <a href="https://hits.sh/roshansky.github.io/belarus-border-queue/">
-    <img alt="Hits" src="https://hits.sh/roshansky.github.io/belarus-border-queue.svg?view=today-total&style=flat-square&label=визиты&color=007ec6" />
-  </a>
-</div>   
+
+    <!-- Простой счетчик просмотров -->
+    <div style="text-align: center; margin: 20px 0;">
+      <a href="https://hits.sh/roshansky.github.io/belarus-border-queue/">
+        <img alt="Hits" src="https://hits.sh/roshansky.github.io/belarus-border-queue.svg?view=today-total&style=flat-square&label=визиты&color=007ec6" />
+      </a>
+    </div>   
 </body>
 </html>
