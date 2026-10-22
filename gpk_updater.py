@@ -4,7 +4,6 @@ import os
 import time
 from datetime import datetime, timedelta
 import urllib3
-from urllib.parse import urlencode
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -18,22 +17,11 @@ CROSSINGS = {
     'grigorov': 'Григоровщина'
 }
 
-# --- НАСТРОЙКА SCRAPER API ---
-proxy_url = os.environ.get("PROXY_URL", "")
-SCRAPER_API_KEY = ""
-if proxy_url and "scraperapi:" in proxy_url:
-    # Достаем ключ из вашей сохраненной ссылки (между "scraperapi:" и "@")
-    try:
-        SCRAPER_API_KEY = proxy_url.split("scraperapi:")[1].split("@")[0]
-    except:
-        pass
-
-def get_scraperapi_url(target_url):
-    """Формирует правильную ссылку для запроса через ScraperAPI"""
-    if not SCRAPER_API_KEY:
-        return target_url
-    payload = {'api_key': SCRAPER_API_KEY, 'url': target_url}
-    return 'http://api.scraperapi.com/?' + urlencode(payload)
+# ВРЕМЕННО ЖЕСТКО ЗАДАЕМ ПРОКСИ, ЧТОБЫ ИСКЛЮЧИТЬ ОШИБКИ СЕКРЕТОВ GITHUB
+PROXIES = {
+    "http": "http://scraperapi:aa1e50e848483721c99aff4383123129@proxy-server.scraperapi.com:8001",
+    "https": "http://scraperapi:aa1e50e848483721c99aff4383123129@proxy-server.scraperapi.com:8001"
+}
 
 def load_archive():
     if os.path.exists(JSON_FILE):
@@ -64,10 +52,7 @@ def update_data():
     now = datetime.now()
     now_time = now.strftime('%H:%M:%S')
     print(f"\n[{now_time}] 🔄 Лечим архив и скачиваем свежие данные...")
-    if SCRAPER_API_KEY:
-        print("🌐 Используется официальный API-метод ScraperAPI")
-    else:
-        print("⚠️ ПРЕДУПРЕЖДЕНИЕ: Ключ API не найден, используется прямое подключение")
+    print("🌐 ТЕСТ: Используется жестко прописанный Proxy-сервер (без GitHub Secrets)")
     
     archive = load_archive()
     
@@ -89,10 +74,8 @@ def update_data():
         "Referer": PAGE_URL
     }
     
-    # Делаем холостой запрос на главную страницу через API
-    target_page = get_scraperapi_url(PAGE_URL)
     try: 
-        session.get(target_page, headers={"User-Agent": headers["User-Agent"]}, verify=False, timeout=15)
+        session.get(PAGE_URL, headers={"User-Agent": headers["User-Agent"]}, verify=False, timeout=10, proxies=PROXIES)
     except: 
         pass
 
@@ -102,9 +85,6 @@ def update_data():
     target_crossings = list(CROSSINGS.keys())
     added_records = 0
     
-    # Подготавливаем API URL для POST-запросов
-    post_api_url = get_scraperapi_url(API_URL)
-    
     while current_date <= now:
         date_str = current_date.strftime("%d.%m.%Y")
         
@@ -112,8 +92,7 @@ def update_data():
             payload = {'ppr': code, 'date': date_str}
             try:
                 time.sleep(1.0) 
-                # Отправляем POST-запрос через ScraperAPI, без параметра proxies=
-                response = session.post(post_api_url, data=payload, headers=headers, verify=False, timeout=20)
+                response = session.post(API_URL, data=payload, headers=headers, verify=False, timeout=15, proxies=PROXIES)
                 api_data = response.json()
                 
                 if api_data.get("isSuccess") and "ITEMS" in api_data:
