@@ -17,10 +17,10 @@ CROSSINGS = {
     'grigorov': 'Григоровщина'
 }
 
-# ЖЕСТКО ЗАДАЕМ РЕЗИДЕНТНЫЙ ПРОКСИ ASTROPROXY (Беларусь)
+# ЖЕСТКО ЗАДАЕМ РЕЗИДЕНТНЫЙ ПРОКСИ ASTROPROXY (Беларусь) - ИСПРАВЛЕННЫЙ ЛОГИН
 PROXIES = {
-    "http": "http://Roshanskyr19:deefc2eM8@45.81.32.154:10052",
-    "https": "http://Roshanskyr19:deefc2eM8@45.81.32.154:10052"
+    "http": "http://RoshanskyrI9:deefc2eM8@45.81.32.154:10052",
+    "https": "http://RoshanskyrI9:deefc2eM8@45.81.32.154:10052"
 }
 
 def load_archive():
