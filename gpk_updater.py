@@ -17,10 +17,10 @@ CROSSINGS = {
     'grigorov': 'Григоровщина'
 }
 
-# ЖЕСТКО ЗАДАЕМ ПЛАТНЫЙ ПРОКСИ PROXY6 (Россия) - ИСПРАВЛЕННЫЙ ЛОГИН
+# ЖЕСТКО ЗАДАЕМ РЕЗИДЕНТНЫЙ ПРОКСИ ASTROPROXY (Беларусь)
 PROXIES = {
-    "http": "http://y9Gr8f:acJFVJ@45.129.171.153:8000",
-    "https": "http://y9Gr8f:acJFVJ@45.129.171.153:8000"
+    "http": "http://Roshanskyr19:deefc2eM8@45.81.32.154:10052",
+    "https": "http://Roshanskyr19:deefc2eM8@45.81.32.154:10052"
 }
 
 def load_archive():
@@ -52,7 +52,7 @@ def update_data():
     now = datetime.now()
     now_time = now.strftime('%H:%M:%S')
     print(f"\n[{now_time}] 🔄 Лечим архив и скачиваем свежие данные...")
-    print("🌐 Используется платный индивидуальный Proxy (РФ)")
+    print("🌐 Используется резидентный прокси Astroproxy (Беларусь)")
     
     archive = load_archive()
     
