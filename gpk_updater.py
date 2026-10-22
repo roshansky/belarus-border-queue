@@ -17,10 +17,10 @@ CROSSINGS = {
     'grigorov': 'Григоровщина'
 }
 
-# ЖЕСТКО ЗАДАЕМ ПЛАТНЫЙ ПРОКСИ PROXY6 (Россия)
+# ЖЕСТКО ЗАДАЕМ ПЛАТНЫЙ ПРОКСИ PROXY6 (Россия) - ИСПРАВЛЕННЫЙ ЛОГИН
 PROXIES = {
-    "http": "http://y9GrBf:acJFVJ@45.129.171.153:8000",
-    "https": "http://y9GrBf:acJFVJ@45.129.171.153:8000"
+    "http": "http://y9Gr8f:acJFVJ@45.129.171.153:8000",
+    "https": "http://y9Gr8f:acJFVJ@45.129.171.153:8000"
 }
 
 def load_archive():
