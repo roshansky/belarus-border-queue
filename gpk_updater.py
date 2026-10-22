@@ -17,6 +17,10 @@ CROSSINGS = {
     'grigorov': 'Григоровщина'
 }
 
+# --- ПОЛУЧАЕМ АДРЕС ПРОКСИ ИЗ GITHUB SECRETS ---
+proxy_url = os.environ.get("PROXY_URL")
+PROXIES = {"http": proxy_url, "https": proxy_url} if proxy_url else None
+
 def load_archive():
     if os.path.exists(JSON_FILE):
         with open(JSON_FILE, 'r', encoding='utf-8') as f:
@@ -46,6 +50,10 @@ def update_data():
     now = datetime.now()
     now_time = now.strftime('%H:%M:%S')
     print(f"\n[{now_time}] 🔄 Лечим архив и скачиваем свежие данные...")
+    if PROXIES:
+        print("🌐 Запрос пойдет через Proxy-сервер")
+    else:
+        print("⚠️ ПРЕДУПРЕЖДЕНИЕ: Прокси не настроен, используется прямое подключение")
     
     archive = load_archive()
     
@@ -65,13 +73,15 @@ def update_data():
     # --- СКАЧИВАЕМ ЗАНОВО ---
     session = requests.Session()
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "X-Requested-With": "XMLHttpRequest",
         "Referer": PAGE_URL
     }
     
-    try: session.get(PAGE_URL, headers={"User-Agent": headers["User-Agent"]}, verify=False, timeout=5)
-    except: pass
+    try: 
+        session.get(PAGE_URL, headers={"User-Agent": headers["User-Agent"]}, verify=False, timeout=10, proxies=PROXIES)
+    except: 
+        pass
 
     start_date = now - timedelta(days=2)
     current_date = start_date
@@ -86,7 +96,7 @@ def update_data():
             payload = {'ppr': code, 'date': date_str}
             try:
                 time.sleep(1.0) 
-                response = session.post(API_URL, data=payload, headers=headers, verify=False, timeout=10)
+                response = session.post(API_URL, data=payload, headers=headers, verify=False, timeout=15, proxies=PROXIES)
                 api_data = response.json()
                 
                 if api_data.get("isSuccess") and "ITEMS" in api_data:
