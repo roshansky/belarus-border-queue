@@ -127,6 +127,11 @@ def update_data():
                             
             except Exception as e:
                 print(f"❌ Ошибка запроса для {code} на {date_str}: {e}")
+                try:
+                    print(f"   Код HTTP: {response.status_code}")
+                    print(f"   Ответ сервера: {response.text[:300]}...")
+                except:
+                    pass
                 
         current_date += timedelta(days=1)
 
