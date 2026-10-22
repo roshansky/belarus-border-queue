@@ -116,7 +116,7 @@ def update_data():
                         added_records += 1
                             
           except Exception as e:
-    print(f"❌ Ошибка запроса для {code} на {date_str}: {e}")
+              print(f"❌ Ошибка запроса для {code} на {date_str}: {e}")
                 
         current_date += timedelta(days=1)
 
