@@ -17,10 +17,10 @@ CROSSINGS = {
     'grigorov': 'Григоровщина'
 }
 
-# ВРЕМЕННО ЖЕСТКО ЗАДАЕМ ПРОКСИ WEBSHARE (Сервер в Польше)
+# ЖЕСТКО ЗАДАЕМ ПЛАТНЫЙ ПРОКСИ PROXY6 (Россия)
 PROXIES = {
-    "http": "http://hvsyrnsb:5yq4xie1c8gj@84.247.60.125:6095",
-    "https": "http://hvsyrnsb:5yq4xie1c8gj@84.247.60.125:6095"
+    "http": "http://y9GrBf:acJFVJ@45.129.171.153:8000",
+    "https": "http://y9GrBf:acJFVJ@45.129.171.153:8000"
 }
 
 def load_archive():
@@ -52,7 +52,7 @@ def update_data():
     now = datetime.now()
     now_time = now.strftime('%H:%M:%S')
     print(f"\n[{now_time}] 🔄 Лечим архив и скачиваем свежие данные...")
-    print("🌐 ТЕСТ: Используется польский прокси Webshare")
+    print("🌐 Используется платный индивидуальный Proxy (РФ)")
     
     archive = load_archive()
     
