@@ -17,11 +17,9 @@ CROSSINGS = {
     'grigorov': 'Григоровщина'
 }
 
-# ЖЕСТКО ЗАДАЕМ РЕЗИДЕНТНЫЙ ПРОКСИ ASTROPROXY (Беларусь) - ИСПРАВЛЕННЫЙ ЛОГИН
-PROXIES = {
-    "http": "http://RoshanskyrI9:deefc2eM8@45.81.32.154:10052",
-    "https": "http://RoshanskyrI9:deefc2eM8@45.81.32.154:10052"
-}
+# БЕРЕМ ПРОКСИ ИЗ СЕКРЕТОВ GITHUB
+PROXY_URL = os.environ.get('PROXY_URL')
+PROXIES = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
 
 def load_archive():
     if os.path.exists(JSON_FILE):
@@ -52,8 +50,12 @@ def update_data():
     now = datetime.now()
     now_time = now.strftime('%H:%M:%S')
     print(f"\n[{now_time}] 🔄 Лечим архив и скачиваем свежие данные...")
-    print("🌐 Используется резидентный прокси Astroproxy (Беларусь)")
     
+    if PROXY_URL:
+        print("🌐 Используется защищенный резидентный прокси из GitHub Secrets")
+    else:
+        print("⚠️ ВНИМАНИЕ: Секрет PROXY_URL не найден, пробуем без прокси!")
+        
     archive = load_archive()
     
     cutoff_date = now - timedelta(days=2)
