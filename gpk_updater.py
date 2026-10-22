@@ -4,6 +4,7 @@ import os
 import time
 from datetime import datetime, timedelta
 import urllib3
+from urllib.parse import urlencode
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -17,9 +18,22 @@ CROSSINGS = {
     'grigorov': 'Григоровщина'
 }
 
-# --- ПОЛУЧАЕМ АДРЕС ПРОКСИ ИЗ GITHUB SECRETS ---
-proxy_url = os.environ.get("PROXY_URL")
-PROXIES = {"http": proxy_url, "https": proxy_url} if proxy_url else None
+# --- НАСТРОЙКА SCRAPER API ---
+proxy_url = os.environ.get("PROXY_URL", "")
+SCRAPER_API_KEY = ""
+if proxy_url and "scraperapi:" in proxy_url:
+    # Достаем ключ из вашей сохраненной ссылки (между "scraperapi:" и "@")
+    try:
+        SCRAPER_API_KEY = proxy_url.split("scraperapi:")[1].split("@")[0]
+    except:
+        pass
+
+def get_scraperapi_url(target_url):
+    """Формирует правильную ссылку для запроса через ScraperAPI"""
+    if not SCRAPER_API_KEY:
+        return target_url
+    payload = {'api_key': SCRAPER_API_KEY, 'url': target_url}
+    return 'http://api.scraperapi.com/?' + urlencode(payload)
 
 def load_archive():
     if os.path.exists(JSON_FILE):
@@ -50,15 +64,13 @@ def update_data():
     now = datetime.now()
     now_time = now.strftime('%H:%M:%S')
     print(f"\n[{now_time}] 🔄 Лечим архив и скачиваем свежие данные...")
-    if PROXIES:
-        print("🌐 Запрос пойдет через Proxy-сервер")
+    if SCRAPER_API_KEY:
+        print("🌐 Используется официальный API-метод ScraperAPI")
     else:
-        print("⚠️ ПРЕДУПРЕЖДЕНИЕ: Прокси не настроен, используется прямое подключение")
+        print("⚠️ ПРЕДУПРЕЖДЕНИЕ: Ключ API не найден, используется прямое подключение")
     
     archive = load_archive()
     
-    # --- ХИРУРГИЧЕСКАЯ ОЧИСТКА ---
-    # Удаляем из архива мусор за последние 2 дня, чтобы переписать их начисто
     cutoff_date = now - timedelta(days=2)
     cutoff_ts = int(datetime(cutoff_date.year, cutoff_date.month, cutoff_date.day).timestamp() * 1000)
     
@@ -70,7 +82,6 @@ def update_data():
         archive[code]["cars"] = [archive[code]["cars"][i] for i in valid_indices]
         archive[code]["buses"] = [archive[code]["buses"][i] for i in valid_indices]
 
-    # --- СКАЧИВАЕМ ЗАНОВО ---
     session = requests.Session()
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -78,8 +89,10 @@ def update_data():
         "Referer": PAGE_URL
     }
     
+    # Делаем холостой запрос на главную страницу через API
+    target_page = get_scraperapi_url(PAGE_URL)
     try: 
-        session.get(PAGE_URL, headers={"User-Agent": headers["User-Agent"]}, verify=False, timeout=10, proxies=PROXIES)
+        session.get(target_page, headers={"User-Agent": headers["User-Agent"]}, verify=False, timeout=15)
     except: 
         pass
 
@@ -89,6 +102,9 @@ def update_data():
     target_crossings = list(CROSSINGS.keys())
     added_records = 0
     
+    # Подготавливаем API URL для POST-запросов
+    post_api_url = get_scraperapi_url(API_URL)
+    
     while current_date <= now:
         date_str = current_date.strftime("%d.%m.%Y")
         
@@ -96,7 +112,8 @@ def update_data():
             payload = {'ppr': code, 'date': date_str}
             try:
                 time.sleep(1.0) 
-                response = session.post(API_URL, data=payload, headers=headers, verify=False, timeout=15, proxies=PROXIES)
+                # Отправляем POST-запрос через ScraperAPI, без параметра proxies=
+                response = session.post(post_api_url, data=payload, headers=headers, verify=False, timeout=20)
                 api_data = response.json()
                 
                 if api_data.get("isSuccess") and "ITEMS" in api_data:
@@ -106,7 +123,6 @@ def update_data():
                         
                         dt_obj = datetime.strptime(time_label, "%d.%m.%Y %H:%M")
                         
-                        # САМОЕ ВАЖНОЕ: Отсекаем часы, которые еще не наступили!
                         if dt_obj > now:
                             continue
                             
