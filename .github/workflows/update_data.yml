@@ -26,6 +26,8 @@ jobs:
       run: pip install -r requirements.txt
 
     - name: Run updater script
+      env:
+        PROXY_URL: ${{ secrets.PROXY_URL }}
       run: python gpk_updater.py
 
     - name: Commit and push changes
