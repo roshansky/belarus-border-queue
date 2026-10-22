@@ -17,10 +17,10 @@ CROSSINGS = {
     'grigorov': 'Григоровщина'
 }
 
-# ВРЕМЕННО ЖЕСТКО ЗАДАЕМ ПРОКСИ, ЧТОБЫ ИСКЛЮЧИТЬ ОШИБКИ СЕКРЕТОВ GITHUB
+# ВРЕМЕННО ЖЕСТКО ЗАДАЕМ ПРОКСИ WEBSHARE
 PROXIES = {
-    "http": "http://scraperapi:aa1e50e848483721c99aff4383123129@proxy-server.scraperapi.com:8001",
-    "https": "http://scraperapi:aa1e50e848483721c99aff4383123129@proxy-server.scraperapi.com:8001"
+    "http": "http://hvsyrnsb:5yq4xie1c8gj@p.webshare.io:80",
+    "https": "http://hvsyrnsb:5yq4xie1c8gj@p.webshare.io:80"
 }
 
 def load_archive():
@@ -52,7 +52,7 @@ def update_data():
     now = datetime.now()
     now_time = now.strftime('%H:%M:%S')
     print(f"\n[{now_time}] 🔄 Лечим архив и скачиваем свежие данные...")
-    print("🌐 ТЕСТ: Используется жестко прописанный Proxy-сервер (без GitHub Secrets)")
+    print("🌐 ТЕСТ: Используется новый прокси Webshare")
     
     archive = load_archive()
     
